@@ -1,0 +1,73 @@
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <title>app-security-light</title>
+    <script src="zepto.min.js"></script>
+    <script src="script.js"></script>
+
+    <style>
+      #edit {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+
+    <section id="list">
+
+      <fieldset>
+        <legend>My Security Lights</legend>
+
+        <ul id="securityLights">
+        </ul>
+      </fieldset>
+
+      <button class="add">Add New</button>
+
+    </section>
+
+    <section id="edit">
+      <h1>Security Light</h1>
+
+      <input type="hidden" name="id" value=""/>
+
+      <div class="field"><label for="name">Name:</label> <input type="text" id="name" name="name"></div>
+
+      <fieldset>
+        <legend>When motion detected on</legend>
+
+        <select name="sensors" multiple>
+        </select>
+
+      </fieldset>
+
+      <fieldset>
+        <legend>Turn on</legend>
+
+        <select name="lights" multiple>
+        </select>
+
+      </fieldset>
+
+      <div class="field"><label for="timeout">Turn off after <input id="timeout" type="number" name="timeout" min="1" max="120" value="5"> minutes </label></div>
+
+      <div class="field">
+        Active
+        <ul>
+          <li><label for="active-always"><input type="radio" id="active-always" name="active" value="always"> Always</label></li>
+          <li>
+            <label for="active-between"><input type="radio" id="active-between" name="active" value="between"> Between</label>
+            <select name="timeStart" class="times">
+            </select>
+            and
+            <select name="timeEnd" class="times">
+            </select>
+          </li>
+        </ul>
+      </div>
+
+      <button class="cancel">Cancel</button> <button class="save">Save</button>
+
+    </section>
+
+  </body>
+</html>
