@@ -4,19 +4,63 @@ $(function() {
       name: "My Security Light",
       sensors: [],
       lights: [],
-      timeout: 5,
-      time: null
+      timeout: 5
     })
   });
 
-  $('.save').click(function() {
+  $('.save').click(function(e) {
+    e.preventDefault()
     // TODO: Save the thing
 
-    list();
+    var securityLight = {lights:[], sensors:[]}
+
+    $('form').serializeArray().forEach(function(field) {
+      if (securityLight[field.name]) {
+        securityLight[field.name].push(field.value)
+      } else {
+        securityLight[field.name] = field.value
+      }
+    });
+
+    if (securityLight.active == 'always') {
+      delete(securityLight.timeStart)
+      delete(securityLight.timeEnd)
+    }
+
+    delete(securityLight.active)
+
+    console.log("saving", securityLight)
+
+    $.post('/api/security-lights', securityLight, function(_, status, response) {
+
+        if (status != 'success') {
+          alert("Failed to save: " + response.responseText)
+        } else {
+          list();
+        }
+    }, 'json');
+
+  });
+
+  $('.cancel').click(function(e) {
+    e.preventDefault()
+    list()
   });
 
   $(document).on('click', 'button.edit', function(e){
     edit(securityLights[$(e.target).data('id')]);
+  })
+
+  $(document).on('click', 'button.delete', function(e){
+    var id = $(e.target).data('id');
+    $.ajax({
+      type: 'DELETE',
+      url: '/api/security-lights/' + id,
+      dataType: 'json',
+      success: function() {
+        list()
+      }
+    });
   })
 })
 
@@ -28,10 +72,12 @@ function list() {
   $('#list').show()
 
   $('#securityLights').empty();
+  securityLights = {};
   $.get("/api/security-lights", function(l) {
+    console.log("got lights", l)
     l.forEach(function(light) {
       securityLights[light.id] = light;
-      $('#securityLights').append('<li>' + light.name + ' <button class="edit" data-id="' + light.id + '">Edit</button> <button class="delete" data="' + light.id + '">Delete</button></li>');
+      $('#securityLights').append('<li>' + light.name + ' <button class="edit" data-id="' + light.id + '">Edit</button> <button class="delete" data-id="' + light.id + '">Delete</button></li>');
     })
   });
 
@@ -43,7 +89,7 @@ function edit(securityLight) {
     el.empty();
     $.get(url, function(items) {
       items.forEach(function(item) {
-        el.append('<option value="' + item.id + '"' + (selected.indexOf(item.id) > -1?' selected':'') + '>' + item.name + item.id + '</option>');
+        el.append('<option value="' + item.id + '"' + (selected.indexOf(item.id) > -1?' selected':'') + '>' + item.name + '</option>');
       })
     })
   }
@@ -54,10 +100,10 @@ function edit(securityLight) {
   $('[name=id]').val(securityLight.id || "")
   $('[name=name]').val(securityLight.name || "")
   $('[name=timeout]').val(securityLight.timeout || "5")
-  if (securityLight.time) {
+  if (securityLight.timeStart) {
       $('[name=active][value=between]').click()
-      $('[name=timeStart]').val(securityLight.time.start)
-      $('[name=timeEnd]').val(securityLight.time.end)
+      $('[name=timeStart]').val(securityLight.timeStart)
+      $('[name=timeEnd]').val(securityLight.timeEnd)
   } else {
       $('[name=active][value=always]').click()
       $('[name=timeStart]').val('sunrise')
@@ -113,90 +159,7 @@ $(function(){
 
 // Http mocking
 if (location.protocol != "file:") {
-
   list();
-
 } else {
-
-  ;(function ($) {
-      $.getScript = function(src, func) {
-          var script = document.createElement('script');
-          script.async = "async";
-          script.src = src;
-          if (func) {
-             script.onload = func;
-          }
-          document.getElementsByTagName("head")[0].appendChild( script );
-      }
-  })($)
-
-  $.getScript("zepto-mockjax.js", function() {
-
-    $.mockjax({
-      type: "GET",
-      url: "/api/security-lights",
-      responseText: [
-        {
-          id: "1",
-          name: "Front Door Security Light",
-          sensors: ["s1"],
-          lights: ["d1-1", "d1-2"],
-          timeout: 10,
-          time: null
-        },
-        {
-          id: "2",
-          name: "Bathroom Night Light",
-          sensors: ["s2-1", "s2-2"],
-          lights: ["d2"],
-          timeout: 20,
-          time: {
-            start: "20:00",
-            end: "sunrise"
-          }
-        }
-      ]
-    });
-
-    $.mockjax({
-      type: "GET",
-      url: "/api/lights",
-      responseText: [
-        {
-          id: "d1-1",
-          name: "Front Door Overhead"
-        },
-        {
-          id: "d1-2",
-          name: "Front Door Spotlight"
-        },
-        {
-          id: "d2",
-          name: "Bathroom Lamp"
-        }
-      ]
-    });
-
-    $.mockjax({
-      type: "GET",
-      url: "/api/sensors",
-      responseText: [
-        {
-          id: "s1",
-          name: "Front Door Motion"
-        },
-        {
-          id: "s2-1",
-          name: "Bathroom Motion"
-        },
-        {
-          id: "s2-2",
-          name: "Bathroom Door Motion"
-        },
-      ]
-    });
-
-    list();
-
-  });
+  mock();
 }
