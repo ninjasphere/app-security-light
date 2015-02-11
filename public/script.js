@@ -31,14 +31,20 @@ $(function() {
 
     console.log("saving", securityLight)
 
-    $.post('/api/security-lights', securityLight, function(_, status, response) {
+    $.ajax({
+      type: "POST",
+      url: '/api/security-lights',
+      data: JSON.stringify(securityLight),
+      dataType: 'json',
+      success: function(_, status, response) {
 
         if (status != 'success') {
           alert("Failed to save: " + response.responseText)
         } else {
           list();
         }
-    }, 'json');
+      }
+    });
 
   });
 
@@ -75,10 +81,11 @@ function list() {
   securityLights = {};
   $.get("/api/security-lights", function(l) {
     console.log("got lights", l)
-    l.forEach(function(light) {
+    for (var id in l) {
+      light = l[id];
       securityLights[light.id] = light;
       $('#securityLights').append('<li>' + light.name + ' <button class="edit" data-id="' + light.id + '">Edit</button> <button class="delete" data-id="' + light.id + '">Delete</button></li>');
-    })
+    }
   });
 
 }
@@ -156,10 +163,11 @@ $(function(){
 
 
 
-
-// Http mocking
-if (location.protocol != "file:") {
-  list();
-} else {
-  mock();
-}
+$(function() {
+  // Http mocking
+  if (location.protocol != "file:") {
+    list();
+  } else {
+    mock();
+  }
+})
