@@ -36,6 +36,11 @@ func startRestServer() error {
 		writeResponse(500, w, light, err)
 	})
 
+	m.Delete("/api/security-lights/:id", func(params martini.Params, w http.ResponseWriter) {
+		err := deleteSecurityLight(params["id"])
+		writeResponse(500, w, nil, err)
+	})
+
 	m.Get("/api/sensors", func(r *http.Request, w http.ResponseWriter) {
 		sensors, err := getSensors()
 		writeResponse(500, w, sensors, err)

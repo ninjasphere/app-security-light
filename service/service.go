@@ -16,7 +16,7 @@ var conn *ninja.Connection
 var saveConfig func()
 
 var log = logger.GetLogger("service")
-var lights map[string]*securityLight
+var lights = make(map[string]*securityLight)
 
 var started bool
 
@@ -75,6 +75,14 @@ func onConfigUpdated(cfg SecurityLightConfig) {
 
 	lightsConfig[cfg.ID] = cfg
 
+	light, ok := lights[cfg.ID]
+	if !ok {
+		light = &securityLight{}
+		lights[cfg.ID] = light
+	}
+
+	light.updateConfig(cfg)
+
 	saveConfig()
 }
 
@@ -82,9 +90,23 @@ func saveSecurityLight(cfg *SecurityLightConfig) error {
 	if cfg.ID == "" {
 		// TODO: Fix me
 		cfg.ID = fmt.Sprintf("%d", rand.Intn(99999))
+
+		cfg.Enabled = true
 	}
 
 	onConfigUpdated(*cfg)
+	return nil
+}
+
+func deleteSecurityLight(id string) error {
+	l, ok := lights[id]
+	if ok {
+		l.destroy()
+		delete(lightsConfig, id)
+		delete(lights, id)
+		saveConfig()
+	}
+
 	return nil
 }
 

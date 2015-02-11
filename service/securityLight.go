@@ -26,6 +26,14 @@ func (l *securityLight) updateConfig(config SecurityLightConfig) error {
 	return nil
 }
 
+func (l *securityLight) destroy() {
+	l.log.Infof("destroy()")
+	for _, s := range l.subscriptions {
+		s.Cancel()
+	}
+	l.subscriptions = nil
+}
+
 func (l *securityLight) onSensor(id string) {
 	// When the sensor goes off...
 
