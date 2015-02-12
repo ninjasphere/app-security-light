@@ -6,8 +6,11 @@ import (
 
 	"github.com/ninjasphere/go-ninja/api"
 	"github.com/ninjasphere/go-ninja/bus"
+	"github.com/ninjasphere/go-ninja/config"
 	"github.com/ninjasphere/go-ninja/logger"
 )
+
+var mocking = config.Bool(false, "mock")
 
 // This isn't an example of good code. Fix it or ignore it, but don't copy it.
 
@@ -19,6 +22,8 @@ var log = logger.GetLogger("service")
 var lights = make(map[string]*securityLight)
 
 var started bool
+
+var latitude, longitude float64
 
 type sensor struct {
 	ID   string `json:"id"`
@@ -46,6 +51,10 @@ func Start(config []SecurityLightConfig, conn1 *ninja.Connection, saveConfig1 fu
 	conn = conn1
 	// *clap*
 	// *clap*
+
+	if mocking {
+		latitude, longitude = -33.86, -151.20
+	}
 
 	saveConfig = func() {
 
@@ -75,13 +84,18 @@ func onConfigUpdated(cfg SecurityLightConfig) {
 
 	lightsConfig[cfg.ID] = cfg
 
-	light, ok := lights[cfg.ID]
-	if !ok {
-		light = &securityLight{}
-		lights[cfg.ID] = light
+	// If we have previously created this security light, destroy it.
+	if light, ok := lights[cfg.ID]; ok {
+		light.destroy()
 	}
 
-	light.updateConfig(cfg)
+	// Create and start the new security light
+	light, err := newSecurityLight(cfg)
+
+	if err != nil {
+		log.Fatalf("Failed to create security light %s: %s", cfg.ID, err)
+	}
+	lights[cfg.ID] = light
 
 	saveConfig()
 }
@@ -111,27 +125,24 @@ func deleteSecurityLight(id string) error {
 }
 
 func getSensors() ([]sensor, error) {
-	return []sensor{
-		sensor{"mysensor1", "My Sensor1"},
-		sensor{"mysensor2", "My Sensor2"},
-		sensor{"mysensor3", "My Sensor3"},
-		sensor{"mysensor4", "My Sensor4"},
-		sensor{"mysensor5", "My Sensor5"},
-		sensor{"mysensor6", "My Sensor6"},
-	}, nil
+	if mocking {
+		return mockSensors, nil
+	}
+	return nil, nil
 }
 
 func getLights() ([]light, error) {
-	return []light{
-		light{"mylight1", "My Light1"},
-		light{"mylight2", "My Light2"},
-		light{"mylight3", "My Light3"},
-		light{"mylight4", "My Light4"},
-		light{"mylight5", "My Light5"},
-		light{"mylight6", "My Light6"},
-	}, nil
+	if mocking {
+		return mockLights, nil
+	}
+
+	return nil, nil
 }
 
-func listenToSensor(deviceId string, callback func(string)) (*bus.Subscription, error) {
+func listenToSensor(thingID string, callback func(thingID string)) (*bus.Subscription, error) {
+
+	if mocking {
+		return mockSensor(thingID, callback)
+	}
 	return nil, nil
 }

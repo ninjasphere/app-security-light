@@ -2,6 +2,7 @@ $(function() {
   $('.add').click(function() {
     edit({
       name: "My Security Light",
+      enabled: true,
       sensors: [],
       lights: [],
       timeout: 5
@@ -26,6 +27,10 @@ $(function() {
       delete(securityLight.timeStart)
       delete(securityLight.timeEnd)
     }
+
+    securityLight.timeout = parseInt(securityLight.timeout)
+
+    securityLight.enabled = securityLight.enabled === "true"
 
     delete(securityLight.active)
 
@@ -73,21 +78,24 @@ $(function() {
 var securityLights = {};
 
 function list() {
-
   $('#edit').hide()
   $('#list').show()
+  refreshSecurityLights()
+}
 
-  $('#securityLights').empty();
-  securityLights = {};
+//setInterval(refreshSecurityLights, 5000);
+function refreshSecurityLights() {
   $.get("/api/security-lights", function(l) {
+
+    securityLights = l;
+    $('#securityLights').empty();
+
     console.log("got lights", l)
     for (var id in l) {
-      light = l[id];
-      securityLights[light.id] = light;
+      light = securityLights[id];
       $('#securityLights').append('<li>' + light.name + ' <button class="edit" data-id="' + light.id + '">Edit</button> <button class="delete" data-id="' + light.id + '">Delete</button></li>');
     }
   });
-
 }
 
 function edit(securityLight) {
@@ -105,6 +113,7 @@ function edit(securityLight) {
   fill($('[name=lights]'), "/api/lights", securityLight.lights)
 
   $('[name=id]').val(securityLight.id || "")
+  $('[name=enabled]').val(securityLight.enabled || "true")
   $('[name=name]').val(securityLight.name || "")
   $('[name=timeout]').val(securityLight.timeout || "5")
   if (securityLight.timeStart) {
@@ -124,7 +133,7 @@ function edit(securityLight) {
 // Times dropdowns
 function pad(a,b){return(1e15+a+"").slice(-b)}
 
-var times = ['midnight', 'sunrise', 'dawn', 'midday', 'sunset', 'dusk']
+var times = ['dawn', 'sunrise', 'sunset', 'dusk']
 
 for (var h = 0; h < 24; h++) {
   for (var m = 0; m < 60; m += 15) {
