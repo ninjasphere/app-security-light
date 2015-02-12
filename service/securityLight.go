@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/ninjasphere/astrotime"
+	"github.com/ninjasphere/go-ninja/api"
 	"github.com/ninjasphere/go-ninja/bus"
 	"github.com/ninjasphere/go-ninja/logger"
 )
@@ -15,6 +15,7 @@ type securityLight struct {
 	log           *logger.Logger
 	subscriptions map[string]*bus.Subscription
 	timeout       *time.Timer
+	onOffServices []*ninja.ServiceClient
 }
 
 func newSecurityLight(config SecurityLightConfig) (*securityLight, error) {
@@ -23,6 +24,7 @@ func newSecurityLight(config SecurityLightConfig) (*securityLight, error) {
 		config:        config,
 		log:           logger.GetLogger("[Name: " + config.Name + "]"),
 		subscriptions: make(map[string]*bus.Subscription),
+		onOffServices: []*ninja.ServiceClient{},
 	}
 
 	l.timeout = time.AfterFunc(time.Minute, l.turnOffLights)
@@ -40,6 +42,16 @@ func newSecurityLight(config SecurityLightConfig) (*securityLight, error) {
 		}
 	}
 
+	// Grab the on-off channels for the lights
+	for _, lightID := range config.Lights {
+		service, err := getOnOffChannelClient(lightID)
+		if err == nil {
+			l.onOffServices = append(l.onOffServices, service)
+		} else {
+			l.log.Warningf("Failed to get light %s on-off service: %s", lightID, err)
+		}
+	}
+
 	return l, nil
 }
 
@@ -53,16 +65,22 @@ func (l *securityLight) destroy() {
 }
 
 func (l *securityLight) turnOnLights() {
-	l.log.Infof("turnOnLights() timeout %s", time.Second*time.Duration(l.config.Timeout))
+	l.log.Infof("turnOnLights()")
 
 	// TODO: Turn on the lights
-	l.timeout.Reset(time.Second * time.Duration(l.config.Timeout))
+	l.timeout.Reset(time.Minute * time.Duration(l.config.Timeout))
+
+	for _, channel := range l.onOffServices {
+		channel.Call("turnOn", nil, nil, 0)
+	}
 }
 
 func (l *securityLight) turnOffLights() {
 	l.log.Infof("turnOffLights()")
 
-	// TODO: Turn off the lights
+	for _, channel := range l.onOffServices {
+		channel.Call("turnOff", nil, nil, 0)
+	}
 }
 
 func (l *securityLight) onSensor(id string) {
@@ -98,7 +116,7 @@ func (l *securityLight) isActiveNow() bool {
 		return true
 	}
 
-	spew.Dump("start", l.config.TimeStart, start, "end", l.config.TimeEnd, end)
+	//spew.Dump("start", l.config.TimeStart, start, "end", l.config.TimeEnd, end)
 
 	if end.Before(start) {
 		return time.Now().After(start) || time.Now().Before(end)
