@@ -1,76 +1,116 @@
 <html lang="en"><head>
     <meta charset="utf-8">
     <title>app-security-light</title>
+
     <script src="zepto.min.js"></script>
     <script src="mock.js"></script>
     <script src="script.js"></script>
+
+    <link rel="stylesheet" href="http://localhost:8100/bower_components/html5-boilerplate/css/normalize.css">
+    <link rel="stylesheet" href="http://localhost:8100/bower_components/html5-boilerplate/css/main.css">
+    <link rel="stylesheet" href="http://localhost:8100/app.css">
 
     <style>
       section {
         display: none;
       }
+
+      .timeoutField label {
+        margin-top: 0;
+      }
+
+      .timeoutField input {
+        width: 3em;
+      }
+
+      .things .thing .selector input {
+        margin-top: 10px;
+      }
+
+      .activeButtons input {
+        display: none;
+      }
+
     </style>
   </head>
   <body>
 
-    <section id="list">
+    <header>
+      <h1>Ninja Labs - Security Lights</h1>
+    </header>
 
-      <fieldset>
-        <legend>My Security Lights</legend>
+    <section id="list" class="panel">
 
-        <ul id="securityLights">
-        </ul>
-      </fieldset>
+      <button class="button full add">add a new security light [ + ]</button>
 
-      <button class="add">Add New</button>
+      <h5>security lights</h5>
+      <ul id="securityLights" class="task-list">
+      </ul>
 
     </section>
 
-    <section id="edit">
-      <h1>Security Light</h1>
+    <section id="edit" class="panel">
+      <h3>Security Light</h3>
       <form>
 
         <input type="hidden" name="enabled" value="true"/>
         <input type="hidden" name="id" value=""/>
 
-        <div class="field"><label for="name">Name:</label> <input type="text" id="name" name="name"></div>
+        <label for="name">Name</label>
+        <div class="field"><input type="text" id="name" name="name"></div>
 
-        <fieldset>
-          <legend>When motion detected on</legend>
 
-          <select name="sensors" multiple>
-          </select>
+        <label>When these devices detect motion</label>
+        <div id="sensors" class="things">
 
-        </fieldset>
-
-        <fieldset>
-          <legend>Turn on</legend>
-
-          <select name="lights" multiple>
-          </select>
-
-        </fieldset>
-
-        <div class="field"><label for="timeout">Turn off after <input id="timeout" type="number" name="timeout" min="1" max="120" value="5"> minutes </label></div>
-
-        <div class="field">
-          Active
-          <ul>
-            <li><label for="active-always"><input type="radio" id="active-always" name="active" value="always"> Always</label></li>
-            <li>
-              <label for="active-between"><input type="radio" id="active-between" name="active" value="between"> Between</label>
-              <select name="timeStart" class="times">
-              </select>
-              and
-              <select name="timeEnd" class="times">
-              </select>
-            </li>
-          </ul>
         </div>
 
-        <button class="cancel">Cancel</button> <button class="save">Save</button>
+        <label>Turn on</label>
+        <div id="lights" class="things">
+
+        </div>
+
+        <label>Then turn off again after </label>
+        <div class="field timeoutField"><label for="timeout"><input id="timeout" type="number" name="timeout" min="1" max="120" value="5"> minutes</label></div>
+
+        <label>Active</label>
+
+        <div class="buttons toggle-button activeButtons">
+          <div class="button"><input type="radio" id="active-always" name="active" value="always"> Always<br/>&nbsp;</div>
+          <div class="button">
+            <input type="radio" id="active-always" name="active" value="between">
+            Between
+            <br/>
+            <select name="timeStart" class="times">
+            </select>
+            and
+            <select name="timeEnd" class="times">
+            </select>
+          </div>
+        </div>
+
+        <br/>
+        <br/>
+        <br style="clear:both"/>
+
+        <div class="buttons">
+          <input type="button" class="button delete" value="Delete">
+          <input type="button" class="button right save" value="Save">
+          <input type="button" class="button cancel right" value="Cancel">
+        </div>
+
+        <br style="clear:both"/>
+
       </form>
     </section>
+
+    <div style="display:none">
+      <div class="thing">
+        <div class="selector"><input type="checkbox" name="sensors" value="ID"></div>
+        <span class="name">NAME</span>
+        <div class="action">&nbsp;</div>
+      </div>
+    </div>
 
   </body>
 </html>

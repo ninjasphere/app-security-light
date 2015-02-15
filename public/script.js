@@ -5,6 +5,8 @@ $(function() {
       enabled: true,
       sensors: [],
       lights: [],
+      timeStart: "sunrise",
+      timeEnd: "sunset",
       timeout: 5
     })
   });
@@ -58,11 +60,32 @@ $(function() {
     list()
   });
 
-  $(document).on('click', 'button.edit', function(e){
+  $(document).on('click', '.things .thing', function(e){
+    var t = $(e.target).parents('.thing');
+
+    if (!$(e.target).is('input')) {
+      t.find('input').click()
+    }
+
+    t.toggleClass('selected', t.find('input').prop('checked'))
+  })
+
+  $(document).on('click', '.activeButtons .button', function(e){
+    var t = $(e.target);
+
+    if (!t.hasClass('button')) {
+      t = t.parents('.button');
+    }
+    t.addClass('selected')
+    $('.activeButtons .button').not(t).removeClass('selected').find('input').removeAttr('checked')
+    t.find('input').attr('checked', 'checked')
+  })
+
+  $(document).on('click', 'a.edit', function(e){
     edit(securityLights[$(e.target).data('id')]);
   })
 
-  $(document).on('click', 'button.delete', function(e){
+  $(document).on('click', '.delete', function(e){
     var id = $(e.target).data('id');
     $.ajax({
       type: 'DELETE',
@@ -79,7 +102,7 @@ var securityLights = {};
 
 function list() {
   $('#edit').hide()
-  $('#list').show()
+  $('#list').css('display', 'block')
   refreshSecurityLights()
 }
 
@@ -93,26 +116,38 @@ function refreshSecurityLights() {
     console.log("got lights", l)
     for (var id in l) {
       light = securityLights[id];
-      $('#securityLights').append('<li>' + light.name + ' <button class="edit" data-id="' + light.id + '">Edit</button> <button class="delete" data-id="' + light.id + '">Delete</button></li>');
+      $('#securityLights').append('<li><span class="name">' + light.name + '</span> <a href="#" class="edit" data-id="' + light.id + '">edit</a></li>');
     }
   });
 }
 
 function edit(securityLight) {
+  var thingTpl = $($('.thing')[0])
 
-  function fill(el, url, selected) {
+  function fill(el, url, selected, name) {
     el.empty();
+
     $.get(url, function(items) {
       items.forEach(function(item) {
-        el.append('<option value="' + item.id + '"' + (selected.indexOf(item.id) > -1?' selected':'') + '>' + item.name + '</option>');
+        var t = thingTpl.clone();
+        t.find('input').attr('value', item.id).attr('name', name);
+        t.find('.name').text(item.name)
+        t.toggleClass('selected', selected.indexOf(item.id) > -1);
+        t.find('input').prop('checked', selected.indexOf(item.id) > -1);
+
+        el.append(t);
       })
     })
   }
 
-  fill($('[name=sensors]'), "/api/sensors", securityLight.sensors)
-  fill($('[name=lights]'), "/api/lights", securityLight.lights)
+  fill($('#sensors'), "/api/sensors", securityLight.sensors, 'sensors')
+  fill($('#lights'), "/api/lights", securityLight.lights, 'lights')
 
   $('[name=id]').val(securityLight.id || "")
+  $('.delete').data('id', securityLight.id)
+
+  $('.delete').toggle(!!securityLight.id)
+
   $('[name=enabled]').val(securityLight.enabled || "true")
   $('[name=name]').val(securityLight.name || "")
   $('[name=timeout]').val(securityLight.timeout || "5")
@@ -145,27 +180,6 @@ $(function(){
   times.forEach(function(t) {
     els.append('<option>'+t+'</option>');
   });
-
-  /* Don't work right with 'sunrise' etc.
-  var endOptions = $('[name=timeEnd] option');
-
-  $('[name=timeStart]').change(function(e) {
-    console.log("Change", e);
-    var selected = $(e.srcElement).find('option').not(function(){ return !this.selected })[0].index;
-
-    endOptions.forEach(function(el, index) {
-      if (index > selected) {
-        $(el).removeAttr('disabled');
-      } else {
-        $(el).attr('disabled', 'disabled');
-      }
-    });
-
-    if (endOptions.not(function(){ return !this.selected })[0].disabled) {
-      endOptions.not(function(){ return this.disabled})[0].selected = true
-    }
-  });
-  */
 })
 
 

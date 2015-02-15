@@ -220,12 +220,10 @@ func listenToSensor(thingID string, callback func(thingID string)) (*bus.Subscri
 
 	// XXX: TODO: Just listen to the first for now...
 
-	conn.GetServiceClient(motionChannels[0].Topic).OnEvent("state", func() bool {
+	return conn.GetServiceClient(motionChannels[0].Topic).OnEvent("state", func() bool {
 		callback(thingID)
 		return true
 	})
-
-	return nil, nil
 }
 
 func getOnOffChannelClient(thingID string) (*ninja.ServiceClient, error) {
