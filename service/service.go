@@ -67,6 +67,8 @@ func Start(config []SecurityLightConfig, conn1 *ninja.Connection, saveConfig1 fu
 
 	if mocking {
 		latitude, longitude = -33.86, -151.20 // Sydney, AU
+	} else {
+		getSiteLocation()
 	}
 
 	saveConfig = func() {
@@ -90,6 +92,24 @@ func Start(config []SecurityLightConfig, conn1 *ninja.Connection, saveConfig1 fu
 	}()
 
 	return nil
+}
+
+func getSiteLocation() {
+	siteModel := conn.GetServiceClient("$home/services/SiteModel")
+	for {
+
+		var site model.Site
+
+		err := siteModel.Call("fetch", config.MustString("siteId"), &site, time.Second*5)
+
+		if err == nil && site.Latitude != nil {
+			latitude, longitude = *site.Latitude, *site.Longitude
+			break
+		}
+
+		log.Infof("Failed to fetch siteid from sitemodel: %s", err)
+		time.Sleep(time.Second * 5)
+	}
 }
 
 func onConfigUpdated(cfg SecurityLightConfig) {
