@@ -10,6 +10,14 @@
     <link rel="stylesheet" href="http://localhost:8100/bower_components/html5-boilerplate/css/main.css">
     <link rel="stylesheet" href="http://localhost:8100/app.css">
 
+    <script>
+      $(function() {
+        $('link[rel="stylesheet"]').forEach(function(el) {
+          $(el).attr('href', $(el).attr('href').replace('localhost', location.hostname));
+        });
+      });
+    </script>
+
     <style>
       section {
         display: none;
