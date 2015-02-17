@@ -36,7 +36,11 @@ func newSecurityLight(config SecurityLightConfig) (*securityLight, error) {
 	for _, sensorID := range config.Sensors {
 		sub, err := listenToSensor(sensorID, l.onSensor)
 		if err == nil {
-			l.subscriptions[sensorID] = sub
+			if sub == nil {
+				l.log.Fatalf("Got a nil subscription back for sensor id: %s", sensorID)
+			} else {
+				l.subscriptions[sensorID] = sub
+			}
 		} else {
 			l.log.Warningf("Failed to subscribe to sensor %s: %s", sensorID, err)
 		}
