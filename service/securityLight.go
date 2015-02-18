@@ -104,17 +104,17 @@ func (l *securityLight) isActiveNow() bool {
 		return false
 	}
 
-	if l.config.TimeStart == "" {
+	if l.config.Time.From == "" {
 		return true
 	}
 
-	start, err := getTime(l.config.TimeStart)
+	start, err := getTime(l.config.Time.From)
 	if err != nil {
 		l.log.Warningf("Failed to parse start time (allowing): %s", err)
 		return true
 	}
 
-	end, err := getTime(l.config.TimeEnd)
+	end, err := getTime(l.config.Time.To)
 	if err != nil {
 		l.log.Warningf("Failed to parse end time (allowing): %s", err)
 		return true

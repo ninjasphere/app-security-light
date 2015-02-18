@@ -51,6 +51,10 @@ func Start(config []SecurityLightConfig, conn1 *ninja.Connection, saveConfig1 fu
 	// *clap*
 	// *clap*
 
+	conn.MustExportService(configService, "$app/"+info.ID+"/configure", &model.ServiceAnnouncement{
+		Schema: "/protocol/configuration",
+	})
+
 	thingModel = conn.GetServiceClient("$home/services/ThingModel")
 
 	lightsConfig = make(map[string]SecurityLightConfig)
