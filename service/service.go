@@ -51,7 +51,7 @@ func Start(config []SecurityLightConfig, conn1 *ninja.Connection, saveConfig1 fu
 	// *clap*
 	// *clap*
 
-	conn.MustExportService(configService, "$app/"+info.ID+"/configure", &model.ServiceAnnouncement{
+	conn.MustExportService(&configService{}, "$app/com.ninjablocks.securitylight/configure", &model.ServiceAnnouncement{
 		Schema: "/protocol/configuration",
 	})
 

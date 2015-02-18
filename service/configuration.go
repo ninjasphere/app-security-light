@@ -2,26 +2,23 @@ package service
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/ninjasphere/app-security-light/service"
 	"github.com/ninjasphere/go-ninja/model"
 )
 
-var configService = config{}
-
-type config struct {
+type configService struct {
 }
 
-func (c *config) Configure(request *model.ConfigurationRequest) (*map[string]interface{}, error) {
+func (c *configService) Configure(request *model.ConfigurationRequest) (*map[string]interface{}, error) {
 	spew.Dump("configure()", request)
 
 	if request.Action == "save" {
-		var lightConfig service.SecurityLightConfig
+		var lightConfig SecurityLightConfig
 		err := json.Unmarshal(request.Data, &lightConfig)
 		if err != nil {
-			log.Fatalf("Failed to unmarshal save config request %s: %s", request.Data, err)
+			return nil, fmt.Errorf("Failed to unmarshal save config request %s: %s", request.Data, err)
 		}
 
 		spew.Dump("Got security light config", lightConfig)
@@ -31,10 +28,15 @@ func (c *config) Configure(request *model.ConfigurationRequest) (*map[string]int
 
 	err := json.Unmarshal([]byte(`
     {
-      "title": "Create new security light",
+      "title": "Edit Security Light",
       "sections": [
         {
           "contents": [
+            {
+              "type": "inputHidden",
+              "name": "id",
+              "value": "1234"
+            },
             {
               "type": "inputText",
               "name": "name",
