@@ -88,13 +88,6 @@ func Start(config []SecurityLightConfig, conn1 *ninja.Connection, saveConfig1 fu
 
 	log.Infof("start()")
 
-	go func() {
-		err := startRestServer()
-		if err != nil {
-			log.Fatalf("Failed to start rest server: %s", err)
-		}
-	}()
-
 	return nil
 }
 
