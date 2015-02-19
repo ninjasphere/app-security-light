@@ -6,12 +6,13 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/ninjasphere/go-ninja/model"
+	"github.com/ninjasphere/go-ninja/suit"
 )
 
 type configService struct {
 }
 
-func (c *configService) Configure(request *model.ConfigurationRequest) (*map[string]interface{}, error) {
+func (c *configService) Configure(request *model.ConfigurationRequest) (*suit.ConfigurationScreen, error) {
 	spew.Dump("configure()", request)
 
 	if request.Action == "save" {
@@ -24,116 +25,88 @@ func (c *configService) Configure(request *model.ConfigurationRequest) (*map[str
 		spew.Dump("Got security light config", lightConfig)
 	}
 
-	var reply map[string]interface{}
+	screen := suit.ConfigurationScreen{
+		Title: "Edit Security Light",
+		Sections: []suit.Section{
+			suit.Section{
+				Contents: []suit.Typed{
+					suit.InputText{
+						Name:        "name",
+						Before:      "Name",
+						Placeholder: "My Security Light",
+						Value:       "Front door light",
+					},
+					suit.OptionGroup{
+						Name:           "sensors",
+						Title:          "When these devices detect motion",
+						MinimumChoices: 1,
+						Options: []suit.OptionGroupOption{
+							suit.OptionGroupOption{
+								Title:    "Front Door Motion",
+								Subtitle: "Motion",
+								Value:    "fd",
+							},
+							suit.OptionGroupOption{
+								Title:    "Back Door 1",
+								Subtitle: "Presence",
+								Value:    "bd",
+								Selected: true,
+							},
+						},
+					},
+					suit.OptionGroup{
+						Name:           "lights",
+						Title:          "Turn on these lights",
+						MinimumChoices: 1,
+						Options: []suit.OptionGroupOption{
+							suit.OptionGroupOption{
+								Title:    "Front Door",
+								Subtitle: "Lamp in Hallway",
+								Value:    "fd",
+							},
+							suit.OptionGroupOption{
+								Title:    "Front Door Spotlight",
+								Subtitle: "Light in Front Step",
+								Value:    "fds",
+								Selected: true,
+							},
+						},
+					},
+					suit.InputTimeRange{
+						Name:  "time",
+						Title: "When",
+						Value: suit.TimeRange{
+							From: "10:00",
+							To:   "sunset",
+						},
+					},
+					suit.InputText{
+						Title:     "Turn off again after",
+						After:     "minutes",
+						Name:      "timeout",
+						InputType: "number",
+						Minimum:   i(0),
+						Value:     5,
+					},
+				},
+			},
+		},
+		Actions: []suit.Typed{
+			suit.CloseAction{
+				Label: "Cancel",
+			},
+			suit.ReplyAction{
+				Label:        "Save",
+				Name:         "save",
+				DisplayClass: "success",
+				DisplayIcon:  "star",
+			},
+		},
+	}
 
-	err := json.Unmarshal([]byte(`
-    {
-      "title": "Edit Security Light",
-      "sections": [
-        {
-          "contents": [
-            {
-              "type": "inputHidden",
-              "name": "id",
-              "value": "1234"
-            },
-            {
-              "type": "inputText",
-              "name": "name",
-              "before": "Name",
-              "placeholder": "My Security Light",
-              "value": "Front door light"
-            },
-            {
-              "type": "optionGroup",
-              "name": "sensors",
-              "title": "When these devices detect motion",
-              "minimumChoices": 1,
-              "options": [
-                {
-                  "title": "Front Door Motion",
-                  "subtitle": "Motion",
-                  "value": "fd"
-                },
-                {
-                  "title": "Back Door 1",
-                  "subtitle": "Presence",
-                  "value": "bd",
-                  "selected": true
-                },
-                {
-                  "title": "Back Door Webcam",
-                  "subtitle": "Camera",
-                  "value": "bdc",
-                  "selected": true
-                }
-              ]
-            },
-            {
-              "type": "optionGroup",
-              "name": "lights",
-              "title": "Turn on these lights",
-              "minimumChoices": 1,
-              "options": [
-                {
-                  "title": "Front Door",
-                  "subtitle": "Lamp in Hallway",
-                  "value": "fd"
-                },
-                {
-                  "title": "Front Door Spotlight",
-                  "subtitle": "Light in Front Step",
-                  "value": "fds"
-                },
-                {
-                  "title": "Above Fridge",
-                  "subtitle": "Lamp in Kitchen",
-                  "value": "kl"
-                },
-                {
-                  "title": "Broken",
-                  "subtitle": "Light in Backyard",
-                  "value": "bdf",
-                  "selected": true
-                }
-              ]
-            },
-            {
-              "type": "inputTimeRange",
-              "name": "time",
-              "title": "When",
-              "value": {
-                "from": "10:00",
-                "to": "sunset"
-              }
-            },
-            {
-              "title": "Turn off again after",
-              "type": "inputText",
-              "after": "minutes",
-              "name": "timeout",
-              "inputType": "number",
-              "minimum": 0,
-              "value": 5
-            }
-          ]
-        }
-      ],
-      "actions": [
-        {
-          "type": "close",
-          "label": "Cancel"
-        },
-        {
-          "type": "reply",
-          "label": "Save",
-          "name": "save",
-          "displayClass": "success",
-          "displayIcon": "star"
-        }
-      ]
-    }
-  `), &reply)
+	return &screen, nil
+}
 
-	return &reply, err
+func i(i int) *int {
+	return &i
 }
