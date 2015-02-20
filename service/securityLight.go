@@ -62,8 +62,10 @@ func newSecurityLight(config SecurityLightConfig) (*securityLight, error) {
 func (l *securityLight) destroy() {
 	l.log.Infof("destroy()")
 	l.timeout.Stop()
-	for _, s := range l.subscriptions {
-		s.Cancel()
+	if l.subscriptions != nil {
+		for _, s := range l.subscriptions {
+			s.Cancel()
+		}
 	}
 	l.subscriptions = nil
 }

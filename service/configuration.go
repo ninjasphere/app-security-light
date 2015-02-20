@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/ninjasphere/go-ninja/model"
 	"github.com/ninjasphere/go-ninja/suit"
 )
@@ -85,7 +84,7 @@ func (c *configService) list() (*suit.ConfigurationScreen, error) {
 }
 
 func (c *configService) Configure(request *model.ConfigurationRequest) (*suit.ConfigurationScreen, error) {
-	spew.Dump("configure()", request)
+	log.Infof("Incoming configuration request. Action:%s Data:%s", request.Action, string(request.Data))
 
 	switch request.Action {
 	case "list":
@@ -125,11 +124,8 @@ func (c *configService) Configure(request *model.ConfigurationRequest) (*suit.Co
 			return nil, fmt.Errorf("Failed to unmarshal save config request %s: %s", request.Data, err)
 		}
 
-		spew.Dump("Got security light config", lightConfig)
-
 		saveSecurityLight(&lightConfig)
 		return c.list()
-
 	default:
 		return c.error(fmt.Sprintf("Unknown action: %s", request.Action))
 	}
@@ -166,7 +162,7 @@ func (c *configService) edit(config SecurityLightConfig) (*suit.ConfigurationScr
 	}
 
 	title := "New Security Light"
-	if config.ID == "" {
+	if config.ID != "" {
 		title = "Edit Security Light"
 	}
 

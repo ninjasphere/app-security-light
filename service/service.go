@@ -69,12 +69,6 @@ func Start(config []SecurityLightConfig, conn1 *ninja.Connection, saveConfig1 fu
 		return err
 	}
 
-	if mocking {
-		latitude, longitude = -33.86, -151.20 // Sydney, AU
-	} else {
-		getSiteLocation()
-	}
-
 	saveConfig = func() {
 
 		cfg := []SecurityLightConfig{}
@@ -84,6 +78,12 @@ func Start(config []SecurityLightConfig, conn1 *ninja.Connection, saveConfig1 fu
 		}
 
 		saveConfig1(cfg)
+	}
+
+	if mocking {
+		latitude, longitude = -33.86, -151.20 // Sydney, AU
+	} else {
+		getSiteLocation()
 	}
 
 	log.Infof("start()")
