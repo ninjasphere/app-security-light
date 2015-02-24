@@ -181,6 +181,7 @@ func (c *configService) edit(config SecurityLightConfig) (*suit.ConfigurationScr
 						Placeholder: "My Security Light",
 						Value:       config.Name,
 					},
+					suit.Separator{},
 					suit.OptionGroup{
 						Name:           "sensors",
 						Title:          "When these devices detect motion",
@@ -193,6 +194,7 @@ func (c *configService) edit(config SecurityLightConfig) (*suit.ConfigurationScr
 						MinimumChoices: 1,
 						Options:        lightOptions,
 					},
+					suit.Separator{},
 					suit.InputTimeRange{
 						Name:  "time",
 						Title: "When",
