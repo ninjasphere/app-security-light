@@ -46,7 +46,8 @@ func (c *configService) list() (*suit.ConfigurationScreen, error) {
 	}
 
 	screen := suit.ConfigurationScreen{
-		Title: "Security Lights",
+		Title:       "Security Lights",
+		DisplayIcon: "lightbulb-o",
 		Sections: []suit.Section{
 			suit.Section{
 				Contents: []suit.Typed{
@@ -167,7 +168,8 @@ func (c *configService) edit(config SecurityLightConfig) (*suit.ConfigurationScr
 	}
 
 	screen := suit.ConfigurationScreen{
-		Title: title,
+		Title:       title,
+		DisplayIcon: "lightbulb-o",
 		Sections: []suit.Section{
 			suit.Section{
 				Contents: []suit.Typed{
