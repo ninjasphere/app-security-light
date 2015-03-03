@@ -137,6 +137,8 @@ func saveSecurityLight(cfg *SecurityLightConfig) error {
 	}
 
 	onConfigUpdated(*cfg)
+
+	saveConfig()
 	return nil
 }
 
