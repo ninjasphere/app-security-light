@@ -51,6 +51,14 @@ func Start(config []SecurityLightConfig, conn1 *ninja.Connection, saveConfig1 fu
 	// *clap*
 	// *clap*
 
+	if mocking {
+		latitude, longitude = -33.86, -151.20 // Sydney, AU
+	} else {
+		getSiteLocation()
+	}
+
+	log.Infof("Using site location - latitude:%f longitude:%f", latitude, longitude)
+
 	conn.MustExportService(&configService{}, "$app/com.ninjablocks.securitylight/configure", &model.ServiceAnnouncement{
 		Schema: "/protocol/configuration",
 	})
@@ -80,12 +88,6 @@ func Start(config []SecurityLightConfig, conn1 *ninja.Connection, saveConfig1 fu
 		saveConfig1(cfg)
 	}
 
-	if mocking {
-		latitude, longitude = -33.86, -151.20 // Sydney, AU
-	} else {
-		getSiteLocation()
-	}
-
 	log.Infof("start()")
 
 	return nil
@@ -104,7 +106,7 @@ func getSiteLocation() {
 			break
 		}
 
-		log.Infof("Failed to fetch siteid from sitemodel: %s", err)
+		log.Infof("Failed to fetch site latitude/longitude: err:%s", err)
 		time.Sleep(time.Second * 5)
 	}
 }
