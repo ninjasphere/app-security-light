@@ -152,7 +152,7 @@ func getTime(s string) (time.Time, error) {
 func parseTimeToday(s string) (time.Time, error) {
 	tmp, err := time.Parse("15:04", s)
 	if err != nil {
-		fmt.Errorf("TODO: Parse named times! : %s - %s", s, err)
+		return time.Time{}, fmt.Errorf("Couldn't parse time! : %s - %s", s, err)
 	}
 
 	// Get that time, today
