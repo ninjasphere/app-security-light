@@ -11,6 +11,15 @@ import (
 type configService struct {
 }
 
+func (c *configService) GetActions(request *model.ConfigurationRequest) (*[]suit.ReplyAction, error) {
+	return &[]suit.ReplyAction{
+		suit.ReplyAction{
+			Label:       "Security Lights",
+			DisplayIcon: "lightbulb-o",
+		},
+	}, nil
+}
+
 func (c *configService) error(message string) (*suit.ConfigurationScreen, error) {
 
 	return &suit.ConfigurationScreen{
