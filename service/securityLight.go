@@ -73,7 +73,6 @@ func (l *securityLight) destroy() {
 func (l *securityLight) turnOnLights() {
 	l.log.Infof("turnOnLights()")
 
-	// TODO: Turn on the lights
 	l.timeout.Reset(time.Minute * time.Duration(l.config.Timeout))
 
 	for _, channel := range l.onOffServices {
@@ -98,7 +97,6 @@ func (l *securityLight) onSensor(id string) {
 
 	l.log.Infof("Sensor activated: %s", id)
 	l.turnOnLights()
-	// TODO: Turn on lights
 }
 
 func (l *securityLight) isActiveNow() bool {
@@ -107,6 +105,10 @@ func (l *securityLight) isActiveNow() bool {
 	}
 
 	if l.config.Time.From == "" {
+		return true
+	}
+
+	if l.config.Time.From == l.config.Time.To {
 		return true
 	}
 
