@@ -45,11 +45,20 @@ func (c *configService) error(message string) (*suit.ConfigurationScreen, error)
 func (c *configService) list() (*suit.ConfigurationScreen, error) {
 
 	var lights []suit.ActionListOption
-
+	var subtitle string
 	for _, light := range lightsConfig {
+		sensorWord := "sensors"
+		if len(light.Sensors) == 1 {
+			sensorWord = "sensor"
+		}
+		lightWord := "lights"
+		if len(light.Lights) == 1 {
+			lightWord = "light"
+		}
+		subtitle = fmt.Sprintf("%d %s, %d %s", len(light.Sensors), sensorWord, len(light.Lights), lightWord)
 		lights = append(lights, suit.ActionListOption{
 			Title:    light.Name,
-			Subtitle: fmt.Sprintf("%d sensors, %d lights", len(light.Sensors), len(light.Lights)),
+			Subtitle: subtitle,
 			Value:    light.ID,
 		})
 	}
@@ -143,6 +152,9 @@ func (c *configService) Configure(request *model.ConfigurationRequest) (*suit.Co
 
 func (c *configService) edit(config SecurityLightConfig) (*suit.ConfigurationScreen, error) {
 
+	// get all things again in case new devices have been added
+	allThings, _ = getAllThings()
+
 	var sensorOptions []suit.OptionGroupOption
 	sensors, err := getSensors()
 	if err != nil {
@@ -226,8 +238,9 @@ func (c *configService) edit(config SecurityLightConfig) (*suit.ConfigurationScr
 			},
 		},
 		Actions: []suit.Typed{
-			suit.CloseAction{
+			suit.ReplyAction{
 				Label: "Cancel",
+				Name:  "list",
 			},
 			suit.ReplyAction{
 				Label:        "Save",

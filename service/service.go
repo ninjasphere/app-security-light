@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"math/rand"
 	"time"
 
 	"github.com/ninjasphere/go-ninja/api"
@@ -132,11 +131,10 @@ func onConfigUpdated(cfg SecurityLightConfig) {
 
 func saveSecurityLight(cfg *SecurityLightConfig) error {
 	if cfg.ID == "" {
-		// TODO: Fix me
-		cfg.ID = fmt.Sprintf("%d", rand.Intn(99999))
-
-		cfg.Enabled = true
+		// use timestamp as ID
+		cfg.ID = fmt.Sprintf("%d", time.Now().UnixNano())
 	}
+	cfg.Enabled = true // "Enabled" isn't in the config - needs to be done outside if
 
 	onConfigUpdated(*cfg)
 
